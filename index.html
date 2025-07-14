@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ScoutPit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #1a1a1a;
+      color: #e5e5e5;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      width: 100%;
+    }
+
+    .sidebar {
+      background: #111;
+      width: 250px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0;
+      border-right: 1px solid #2a2a2a;
+      overflow-y: auto;
+    }
+
+    .sidebar h2 {
+      color: #3b82f6;
+      font-size: 1.4rem;
+      padding: 0 20px 10px;
+    }
+
+    .section-label {
+      color: #999;
+      font-size: 0.8rem;
+      padding: 10px 20px 5px;
+      text-transform: uppercase;
+    }
+
+    .sidebar button, .chat-preview {
+      background: none;
+      border: none;
+      color: #e5e5e5;
+      text-align: left;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    .sidebar button:hover, .chat-preview:hover {
+      background: #2a2a2a;
+    }
+
+    .chat-preview {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .topbar {
+      background: #111;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .chat-area {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 14px 18px;
+      border-radius: 16px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      font-size: 0.95rem;
+    }
+
+    .message.bot {
+      background: #2a2a2a;
+      align-self: flex-start;
+    }
+
+    .message.user {
+      background: #3b82f6;
+      color: #fff;
+      align-self: flex-end;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 10px;
+      padding: 16px;
+      border-top: 1px solid #2a2a2a;
+      background: #111;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: none;
+      background: #333;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    button.send-btn {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      padding: 12px 18px;
+      font-weight: bold;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button.send-btn:hover {
+      background: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <h2>ScoutPit</h2>
+      <div class="section-label">New</div>
+      <button onclick="newChat()">New chat</button>
+      <button> Search chats</button>
+      <button> Library</button>
+      <div class="section-label">Chats</div>
+      <div id="chatList"></div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>AI Car Concierge</div>
+        <button>Share</button>
+      </div>
+
+      <div class="chat-area" id="chatBox">
+        <div class="message bot">👋 Welcome to ScoutPit. What kind of car are you looking for today?</div>
+      </div>
+
+      <div class="input-area">
+        <input type="text" id="userInput" placeholder="Ask anything..." />
+        <button class="send-btn" onclick="sendMessage()">Send</button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const chatList = document.getElementById("chatList");
+    const chatBox = document.getElementById("chatBox");
+
+    function newChat() {
+      chatBox.innerHTML = '<div class="message bot">👋 Welcome to ScoutPit. What kind of car are you looking for today?</div>';
+    }
+
+    function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value.trim();
+      if (!message) return;
+
+      addMessage("user", message);
+      addToChatList(message);
+      input.value = "";
+
+      setTimeout(() => {
+        addMessage("bot", `🔎 Searching for "${message}"...\n✅ Found a match: https://example.com/car`);
+      }, 800);
+    }
+
+    function addMessage(sender, text) {
+      const div = document.createElement("div");
+      div.className = `message ${sender}`;
+      div.textContent = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function addToChatList(text) {
+      const chat = document.createElement("div");
+      chat.className = "chat-preview";
+      chat.textContent = text;
+      chat.onclick = () => {
+        document.getElementById("userInput").value = text;
+      };
+      chatList.prepend(chat);
+    }
+  </script>
+</body>
+</html>
