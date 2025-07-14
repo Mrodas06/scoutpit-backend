@@ -1,34 +1,41 @@
-function sendMessage() {
-    const input = document.getElementById("userInput");
-    const message = input.value.trim();
-    if (message === "") return;
-  
-    addMessage("user", message);
-    input.value = "";
-  
-    fetch('http://localhost:3001/ask', {
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ prompt: message })
-    })
-    .then(res => res.json())
-    .then(data => {
-      addMessage("bot", data.reply);
-    })
-    .catch(err => {
-      console.error("❌ Error:", err);
-      addMessage("bot", "❌ Couldn't reach the AI. Try again later.");
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { OpenAI } from 'openai';
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// ✅ Add this route for Render health check
+app.get("/", (req, res) => {
+  res.send("✅ ScoutPit backend is live");
+});
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+app.post('/ask', async (req, res) => {
+  try {
+    const prompt = req.body.prompt;
+
+    const chatCompletion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: prompt }]
     });
+
+    res.json({ reply: chatCompletion.choices[0].message.content });
+  } catch (err) {
+    console.error("❌ API Error:", err);
+    res.status(500).json({ reply: "Something went wrong with the AI." });
   }
-  
-  function addMessage(sender, text) {
-    const chatBox = document.getElementById("chatBox");
-    const div = document.createElement("div");
-    div.className = `message ${sender}`;
-    div.textContent = text;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-  
+});
+
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`✅ Server is running on port ${PORT}`);
+});
