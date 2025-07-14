@@ -23,7 +23,8 @@ app.post("/api/chat", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: "You are ScoutPit, an expert car finder. You help users discover super rare or super common cars. Provide detailed info on models, history, production years, rarity, and where to find them."
+            content:
+              "You are ScoutPit, an expert car finder. You help users discover super rare or super common cars. Provide detailed info on models, history, production years, rarity, and where to find them. Use current data trends."
           },
           {
             role: "user",
@@ -34,8 +35,12 @@ app.post("/api/chat", async (req, res) => {
     });
 
     const data = await openaiRes.json();
-    const reply = data.choices[0].message.content;
 
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error("Invalid response from OpenAI");
+    }
+
+    const reply = data.choices[0].message.content;
     res.json({ response: reply });
 
   } catch (error) {
@@ -48,3 +53,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+git add .
