@@ -23,28 +23,15 @@ function sendMessage() {
   }
   
   async function askScoutPit(prompt) {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://scoutpit-backend.onrender.com/api/chat", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_OPENAI_API_KEY"
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: "You are ScoutPit, an expert car finder. You help users discover super rare or super common cars. Provide detailed info on models, history, production years, rarity, and where to find them. Use current data trends."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ]
-      })
+      body: JSON.stringify({ prompt })
     });
   
     const data = await response.json();
-    return data.choices[0].message.content;
+    return data.response;
   }
   
