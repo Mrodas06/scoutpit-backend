@@ -1,37 +1,43 @@
-function sendMessage() {
-    const input = document.getElementById("userInput");
-    const message = input.value.trim();
-    if (message === "") return;
-  
-    addMessage("user", message);
-    input.value = "";
-  
-    askScoutPit(message).then((response) => {
-      addMessage("bot", response);
-    }).catch(() => {
-      addMessage("bot", "❌ Sorry, something went wrong fetching data.");
-    });
-  }
-  
-  function addMessage(sender, text) {
-    const chatBox = document.getElementById("chatBox");
-    const div = document.createElement("div");
-    div.className = `message ${sender}`;
-    div.textContent = text;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-  
-  async function askScoutPit(prompt) {
-    const response = await fetch("https://scoutpit-backend.onrender.com/api/chat", {
+const chatContainer = document.querySelector(".chat-container");
+const inputField = document.querySelector("input");
+const sendBtn = document.querySelector(".send-btn");
+
+function appendMessage(role, text) {
+  const messageEl = document.createElement("div");
+  messageEl.className = `message ${role}`;
+  messageEl.innerText = text;
+  chatContainer.appendChild(messageEl);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+async function sendMessage() {
+  const userInput = inputField.value.trim();
+  if (!userInput) return;
+
+  appendMessage("user", userInput);
+  inputField.value = "";
+
+  appendMessage("assistant", "Thinking...");
+
+  try {
+    const response = await fetch("http://localhost:10000/api/chat", { // ✅ added full backend path
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ prompt })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userInput }),
     });
-  
+
     const data = await response.json();
-    return data.response;
+    console.log("🔥 OpenAI data:", data);
+
+    const reply = data.response || "Sorry, I couldn't find anything.";
+
+    document.querySelector(".message.assistant:last-child").remove();
+    appendMessage("assistant", reply);
+  } catch (err) {
+    console.error("❌ Error talking to server:", err);
+    document.querySelector(".message.assistant:last-child").remove();
+    appendMessage("assistant", "Error getting response. Try again later.");
   }
-  
+}
+
+sendBtn.addEventListener("click", sendMessage);
